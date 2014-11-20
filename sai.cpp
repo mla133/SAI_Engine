@@ -43,14 +43,6 @@ int main()
 	//Read in inj_tx to buffer
 	if ( (pipe = open( PIPE_FIFO , O_RDONLY)) < 0) logger;
 	if ( (buf_size = read(pipe, buffer, MAX_BUF)) < 0) logger;
-/*	if ( (buf_size = read(pipe, buffer, MAX_BUF)) < 3) 
-	{
-	  logger; // We're missing something...like the injector address...
-	  memset(buffer, 0, MAX_BUF);  //clear out buffer
-	  close(pipe);
-	  continue;
-	}
-*/
 	buffer[buf_size] = 0; //null terminate string
 
 	// Pull out address to strncat into response later

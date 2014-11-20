@@ -20,3 +20,6 @@ run: $(TARGET)
 mail:
 	mail -s "SAI source" "$(EMAIL)" < sai.cpp
 	mail -s "SAI makefile" "$(EMAIL)" < makefile
+
+gitadd:
+	git add sai.cpp
