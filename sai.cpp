@@ -1,4 +1,4 @@
-/* SAI Engine - rev 0.91 by Matt Allen */
+/* SAI Engine - by Matt Allen */
 // Added github.com repository for this to keep track of changes 11/20/14
 
 /* Constantly tries to read file "/var/tmp/a4m/socat_output_injector_fifo" for buffered message
@@ -16,26 +16,22 @@
 #define RXFILE 		"/var/tmp/a4m/socat_smart_injector_input_data_file"
 #define PIPE_FIFO   	"/var/tmp/a4m/socat_output_smart_injector_fifo"
 #define logger { printf("%s:%d\n",__FILE__,__LINE__);}
-#define MAX_BUF 1024
+#define MAX_BUF 20
 #define MAX_BUF_LEN 17
 
 #define DEBUG 0
 int main()
 {
   char buffer[MAX_BUF];
-  char response[80];
+  char response[MAX_BUF];
   char tempBuf[40];
   char address_buf[3];
 
   FILE * pFile;
   long lSize;
   size_t result;
-  double NRT = 0.0;
-  double NRT2 = 0.0;
-  double NRT3 = 0.0;
-  int pipe;
-  int buf_size;
-  int inj_address;
+  double NRT, NRT2, NRT3 = 0.0;
+  int pipe, buf_size, inj_address;
 
   printf("STARTING UP SAI BLACK BOX\n");
   while(1)
@@ -52,10 +48,13 @@ int main()
 
 
 #ifdef DEBUG
-	printf("\E[31;40m***********************\E[0m\n");
-	printf("\E[31;40mIncoming: \E[0m");
-	printf(" %s -->  ",buffer);
+	for (int i=0;i<MAX_BUF;i++)
+	  printf("%02x ", buffer[i]);
+	printf("\n");
 #endif
+
+	printf("\E[31;40m***********************\E[0m\n");
+	printf("\E[31;40mIncoming: %s\E[0m\n", buffer);
 
 	// Parse buffer, supply response buffer
 
@@ -102,8 +101,8 @@ int main()
 	//BLENDPAK/MINIPAK
 	else if ( strncmp ("EX 050", buffer+3, 6) == 0)
 	{
-	  if(inj_address == 72) NRT2 +=10.0; // increment the NRT for additive totals
-	  if(inj_address == 83) NRT3 +=20.0; // increment the NRT for additive totals
+	  if(inj_address == 72) NRT2 +=0.001; // increment the NRT for additive totals
+	  if(inj_address == 83) NRT3 +=0.001; // increment the NRT for additive totals
 	  strcpy(response, address_buf);
 	  strcat(response,"OK");
 	  if(atoi(address_buf) == 72)
@@ -156,11 +155,9 @@ int main()
 	  printf("\E[33;40m[ERROR]\E[0m\n");
 	}
 
-#ifdef DEBUG
 	printf("\E[32;40mOutgoing: \E[0m");
 	printf(" %s\n",response);
 	printf("\E[32;40m***********************\E[0m\n\n");
-#endif
 
 	// Open up inj_rx and write response
 	pFile = fopen( RXFILE, "w+");
