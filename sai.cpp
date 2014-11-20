@@ -1,9 +1,5 @@
-/* SAI Engine - rev 0.7 by Matt Allen */
-// Rev 0.91- Updated input/ouput fifo/input files to match spec
-// Rev 0.9 - Added MiniPak & BlendPak, added check to watch for specific injector addresses
-// Rev 0.8 - adding in a second address to parse, added address_buf to store incoming inj address
-// Rev 0.7 - switched to FIFO for TX buffer
-// rev 0.6 - Added NRT variable to increment returned totals when polled
+/* SAI Engine - rev 0.91 by Matt Allen */
+// Added github.com repository for this to keep track of changes 11/20/14
 
 /* Constantly tries to read file "/var/tmp/a4m/socat_output_injector_fifo" for buffered message
  * and then outputs to write file "/var/tmp/a4m/socat_smart_injector_fifo" for response from pseudo
