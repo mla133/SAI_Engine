@@ -73,6 +73,10 @@ int main()
 	}
 	else if ( strncmp ("AS 001 0010.0",buffer+3, 13) == 0 )
 	   strcat(response, "OK");
+	else if ( strncmp ("AL 001", buffer+3, 6) == 0)
+	   strcat(response, "OK");
+	else if ( strncmp ("UL 001", buffer+3, 6) == 0)
+	   strcat(response, "OK");
 	else if ( strncmp ("at 001", buffer+3, 6) == 0)
 	{
 	  sprintf(tempBuf, "at 001 %10.1f", NRT);
@@ -112,7 +116,7 @@ int main()
 	  strcat(response,"OK");
 	else if ( strncmp ("", buffer, MAX_BUF_LEN) == 0)
 	{
-	  memset(response,0,80);
+	  memset(response,0,MAX_BUF);
 	  logger;
 	  continue;
 	}
