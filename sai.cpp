@@ -71,10 +71,8 @@ int main()
 	    NRT +=0.02; // increment the NRT for additive totals
 	    strcat(response, "OK");
 	}
-	else if ( strncmp ("AS 001 0010.0",buffer+3, 13) == 0 ) 
-	{
+	else if ( strncmp ("AS 001 0010.0",buffer+3, 13) == 0 )
 	   strcat(response, "OK");
-	}
 	else if ( strncmp ("at 001", buffer+3, 6) == 0)
 	{
 	  sprintf(tempBuf, "at 001 %10.1f", NRT);
@@ -86,13 +84,10 @@ int main()
 	  strcat(response, tempBuf);
 	}	
 	else if ( strncmp ("ac 001", buffer+3, 6) == 0)
-	{
 	  strcat(response,"ac 001 0000");
-	}
 	else if ( strncmp ("PS 001 0010.0", buffer+3, 13) == 0)
-	{
 	  strcat(response,"OK");
-	}
+
 	//BLENDPAK/MINIPAK
 	else if ( strncmp ("EX 050", buffer+3, 6) == 0)
 	{
@@ -100,13 +95,9 @@ int main()
 	  strcat(response,"OK");
 	}
 	else if (strncmp("EX", buffer+3, 2) == 0)
-	{
 	  strcat(response,"OK");
-	}
 	else if ( strncmp("RV 802", buffer+3, 6) == 0 )
-	{
 	  strcat(response, "RV 802 0000");
-	}
 	else if (strncmp("RV 860", buffer+3, 6) == 0)
 	{
 	  sprintf(tempBuf, "RV 860 %09.3f", NRT2);
@@ -118,9 +109,7 @@ int main()
 	  strcat(response, tempBuf);
 	}
 	else if (strncmp("WV", buffer+3, 2) == 0)
-	{
 	  strcat(response,"OK");
-	}
 	else if ( strncmp ("", buffer, MAX_BUF_LEN) == 0)
 	{
 	  memset(response,0,80);
