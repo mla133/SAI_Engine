@@ -30,10 +30,14 @@ int main()
   FILE * pFile;
   long lSize;
   size_t result;
-  double NRT, NRT2, NRT3 = 0.0;
+  double NRT = 0.0;
+  double NRT2 = 0.0;
+  double NRT3 = 0.0;
   int pipe, buf_size, inj_address;
 
   printf("STARTING UP SAI BLACK BOX\n");
+  memset(buffer, 0, MAX_BUF);
+
   while(1)
   {
 	//Read in inj_tx to buffer
@@ -41,20 +45,23 @@ int main()
 	if ( (buf_size = read(pipe, buffer, MAX_BUF)) < 0) logger;
 	buffer[buf_size] = 0; //null terminate string
 
+	printf("\E[31;40m***********************\E[0m\n");
+	printf("\E[31;40mIncoming: %s\E[0m  ", buffer);
+
+#ifdef DEBUG
+	printf("[ ");
+	for (int i=0;i<MAX_BUF;i++)
+	  printf("%02x ", buffer[i]);
+	printf("]");
+#endif
+	printf("\n");
+
 	// Pull out address to strncat into response later
 	memcpy(address_buf, buffer, 3);
 	address_buf[3] = 0;
 	inj_address = atoi(address_buf);
 
-
-#ifdef DEBUG
-	for (int i=0;i<MAX_BUF;i++)
-	  printf("%02x ", buffer[i]);
-	printf("\n");
-#endif
-
-	printf("\E[31;40m***********************\E[0m\n");
-	printf("\E[31;40mIncoming: %s\E[0m\n", buffer);
+	strcpy(response, address_buf);
 
 	// Parse buffer, supply response buffer
 
@@ -62,85 +69,57 @@ int main()
 	if( strncmp ("BI 001", buffer+3, 6) == 0 )
 	{
 	    NRT +=0.02; // increment the NRT for additive totals
-	    strcpy(response, address_buf);
 	    strcat(response, "OK");
-	    printf("\E[33;40mTITAN(%d): II\E[0m\n", inj_address);
 	}
 	else if ( strncmp ("AS 001 0010.0",buffer+3, 13) == 0 ) 
 	{
-	   strcpy(response, address_buf);
 	   strcat(response, "OK");
-	   printf("\E[33;40mTITAN(%d): SET_VOL_PER_CYCLE\E[0m\n", inj_address);
 	}
 	else if ( strncmp ("at 001", buffer+3, 6) == 0)
 	{
-	  strcpy(response, address_buf);
 	  sprintf(tempBuf, "at 001 %10.1f", NRT);
 	  strcat(response, tempBuf);
-	  printf("\E[33;40mTITAN(%d): POLL_TOTALS\E[0m\n", inj_address);
 	}
 	else if ( strncmp ("ls 001", buffer+3, 6) == 0)
 	{
-	  strcpy(response, address_buf);
 	  sprintf(tempBuf, "ls 001 %09.4f 0000", NRT);
 	  strcat(response, tempBuf);
-	  printf("\E[33;40mTITAN(%d): POLL_TOTALS_AND_ALARMS\E[0m\n", inj_address);
 	}	
 	else if ( strncmp ("ac 001", buffer+3, 6) == 0)
 	{
-	  strcpy(response, address_buf);
 	  strcat(response,"ac 001 0000");
-	  printf("\E[33;40mTITAN(%d): POLL_ALARMS\E[0m\n", inj_address);
 	}
 	else if ( strncmp ("PS 001 0010.0", buffer+3, 13) == 0)
 	{
-	  strcpy(response, address_buf);
 	  strcat(response,"OK");
-	  printf("\E[33;40mTITAN(%d): SET_VOL_PER_INJ\E[0m\n", inj_address);
 	}
 	//BLENDPAK/MINIPAK
 	else if ( strncmp ("EX 050", buffer+3, 6) == 0)
 	{
-	  if(inj_address == 72) NRT2 +=0.001; // increment the NRT for additive totals
-	  if(inj_address == 83) NRT3 +=0.001; // increment the NRT for additive totals
-	  strcpy(response, address_buf);
+	  if(inj_address == 72) NRT2 += 0.01; // increment the NRT for additive totals
 	  strcat(response,"OK");
-	  if(atoi(address_buf) == 72)
-	    printf("\E[35;40mBLENDPAK(%d): II\E[0m\n", inj_address);
-	  else
-	    printf("\E[36;40mMINIPAK(%d): II\E[0m\n", inj_address);
 	}
-	else if ( (strncmp("EX", buffer+3, 2) == 0) || (strncmp("WV", buffer+3, 2) == 0) )
+	else if (strncmp("EX", buffer+3, 2) == 0)
 	{
-	  strcpy(response, address_buf);
 	  strcat(response,"OK");
-	  if(inj_address  == 72)
-	    printf("\E[35;40mBLENDPAK(%d): POLLING/SETTING VOLUME/RATES\E[0m\n", inj_address);
-	  else
-	    printf("\E[36;40mMINIPAK(%d): POLLING/SETTING VOLUME/RATES\E[0m\n", inj_address);
 	}
 	else if ( strncmp("RV 802", buffer+3, 6) == 0 )
 	{
-	  strcpy(response, address_buf);
 	  strcat(response, "RV 802 0000");
-	  if(atoi(address_buf) == 72)
-	    printf("\E[35;40mBLENDPAK(%d): POLL ALARMS\E[0m\n", inj_address);
-	  else
-	    printf("\E[36;40mMINIPAK(%d): POLL ALARMS\E[0m\n", inj_address);
 	}
-	else if ( (strncmp("RV 860", buffer+3, 6) == 0) || ( (strncmp("RV 850", buffer+3, 6) == 0) ) )
+	else if (strncmp("RV 860", buffer+3, 6) == 0)
 	{
-	  strcpy(response, address_buf);
-	  sprintf(tempBuf, "RV 870 %09.3f", NRT);
+	  sprintf(tempBuf, "RV 860 %09.3f", NRT2);
 	  strcat(response, tempBuf);
-	  printf("\E[35;40mBLENDPAK(%d): POLL TOTALS\E[0m\n", inj_address);
 	}
-	else if ( (strncmp("RV 850", buffer+3, 6) == 0) || ( (strncmp("RV 850", buffer+3, 6) == 0) ) )
+	else if (strncmp("RV 850", buffer+3, 6) == 0) // MINI-PAK POLL_TOTALS
 	{
-	  strcpy(response, address_buf);
-	  sprintf(tempBuf, "RV 870 %09.3f", NRT);
+	  sprintf(tempBuf, "RV 850 %09.3f", NRT3);
 	  strcat(response, tempBuf);
-	  printf("\E[36;40mMINIPAK(%d): POLL TOTALS\E[0m\n", inj_address);
+	}
+	else if (strncmp("WV", buffer+3, 2) == 0)
+	{
+	  strcat(response,"OK");
 	}
 	else if ( strncmp ("", buffer, MAX_BUF_LEN) == 0)
 	{
@@ -150,7 +129,6 @@ int main()
 	}
 	else
 	{
-	  strcpy(response, address_buf);
 	  strcat(response,"NO00");
 	  printf("\E[33;40m[ERROR]\E[0m\n");
 	}
