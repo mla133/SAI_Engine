@@ -19,7 +19,7 @@
 #define MAX_BUF 20
 #define MAX_BUF_LEN 17
 
-#define DEBUG 0
+//#define DEBUG 0
 int main()
 {
   char buffer[MAX_BUF];
@@ -45,14 +45,13 @@ int main()
 	if ( (buf_size = read(pipe, buffer, MAX_BUF)) < 0) logger;
 	buffer[buf_size] = 0; //null terminate string
 
-	printf("\E[31;40m***********************\E[0m\n");
-	printf("\E[31;40mIncoming: %s\E[0m  ", buffer);
+	printf("\E[31;40mIncoming:  %s\E[0m  ", buffer);
 
 #ifdef DEBUG
 	printf("[ ");
 	for (int i=0;i<MAX_BUF;i++)
-	  printf("%02x ", buffer[i]);
-	printf("]");
+	  printf("\E[31;40m%02x ", buffer[i]);
+	printf("]\E[0m");
 #endif
 	printf("\n");
 
@@ -77,6 +76,10 @@ int main()
 	   strcat(response, "OK");
 	else if ( strncmp ("UL 001", buffer+3, 6) == 0)
 	   strcat(response, "OK");
+	else if ( strncmp ("PS 001 0010", buffer+3, 11) == 0)
+	  strcat(response,"OK");
+	else if ( strncmp ("ac 001", buffer+3, 6) == 0)
+	  strcat(response,"ac 001 0000");
 	else if ( strncmp ("at 001", buffer+3, 6) == 0)
 	{
 	  sprintf(tempBuf, "at 001 %10.1f", NRT);
@@ -87,10 +90,6 @@ int main()
 	  sprintf(tempBuf, "ls 001 %09.4f 0000", NRT);
 	  strcat(response, tempBuf);
 	}	
-	else if ( strncmp ("ac 001", buffer+3, 6) == 0)
-	  strcat(response,"ac 001 0000");
-	else if ( strncmp ("PS 001 0010.0", buffer+3, 13) == 0)
-	  strcat(response,"OK");
 
 	//BLENDPAK/MINIPAK
 	else if ( strncmp ("EX 050", buffer+3, 6) == 0)
@@ -117,18 +116,25 @@ int main()
 	else if ( strncmp ("", buffer, MAX_BUF_LEN) == 0)
 	{
 	  memset(response,0,MAX_BUF);
-	  logger;
+	  printf("\E[33;40m[ERROR -- NO INC BUFFER]\E[0m\n");
 	  continue;
 	}
 	else
 	{
 	  strcat(response,"NO00");
-	  printf("\E[33;40m[ERROR]\E[0m\n");
+	  printf("\E[33;40m[ERROR -- NO CMD MATCH]\E[0m\n");
 	}
 
-	printf("\E[32;40mOutgoing: \E[0m");
-	printf(" %s\n",response);
-	printf("\E[32;40m***********************\E[0m\n\n");
+	printf("\E[32;40mOutgoing: ");
+	printf("\E[32;40m %s \E[0m ",response);
+
+#ifdef DEBUG
+	printf("[ ");
+	for (int i=0;i<MAX_BUF;i++)
+	  printf("\E[32;40m%02x ", response[i]);
+	printf("]\E[0m\n");
+#endif
+	printf("\n");
 
 	// Open up inj_rx and write response
 	pFile = fopen( RXFILE, "w+");
