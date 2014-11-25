@@ -50,16 +50,12 @@ int main(int argc, char *argv[])
   printf("***STARTING UP SAI BLACK BOX***\n");
   if ((atoi(argv[1])) == 1)
   {
-	int PIPE_FIFO = PIPE_FIFO1;
-	int RXFILE = RXFILE1;
   	printf("INCOMING FIFO -> %s\n", PIPE_FIFO1);
   	printf("OUTGOING FILE -> %s\n", RXFILE1);
   }
   else if ((atoi(argv[1])) == 2)
   {
 
-	int PIPE_FIFO = PIPE_FIFO2;
-	int RXFILE = RXFILE2;
   	printf("INCOMING FIFO -> %s\n", PIPE_FIFO2);
   	printf("OUTGOING FILE -> %s\n", RXFILE2);
   }
@@ -69,7 +65,11 @@ int main(int argc, char *argv[])
   while(1)
   {
 	//Read in inj_tx to buffer
-	if ( (pipe = open( PIPE_FIFO , O_RDONLY)) < 0) logger;
+	if ((atoi(argv[1])) == 1)
+		if ( (pipe = open( PIPE_FIFO1 , O_RDONLY)) < 0) logger;
+	if ((atoi(argv[1])) == 2)
+		if ( (pipe = open( PIPE_FIFO2 , O_RDONLY)) < 0) logger;
+
 	if ( (buf_size = read(pipe, buffer, MAX_BUF)) < 0) logger;
 	buffer[buf_size] = 0; //null terminate string
 
@@ -166,7 +166,10 @@ int main(int argc, char *argv[])
 	printf("\n");
 
 	// Open up inj_rx and write response
-	pFile = fopen( RXFILE, "w+");
+	if ((atoi(argv[1])) == 1)
+		pFile = fopen( RXFILE2, "w+");
+	if ((atoi(argv[1])) == 2)
+		pFile = fopen( RXFILE2, "w+");
   	fwrite(response, sizeof(char), strlen(response), pFile);
   	fclose(pFile);
 
