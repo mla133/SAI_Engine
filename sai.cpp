@@ -95,6 +95,7 @@ int main()
 	else if ( strncmp ("EX 050", buffer+3, 6) == 0)
 	{
 	  if(inj_address == 72) NRT2 += 0.01; // increment the NRT for additive totals
+	  if(inj_address == 83) NRT3 += 0.01; // increment the NRT for additive totals
 	  strcat(response,"OK");
 	}
 	else if (strncmp("EX", buffer+3, 2) == 0)
