@@ -13,15 +13,26 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
-#define RXFILE 		"/var/tmp/a4m/socat_smart_injector_input_data_file"
-#define PIPE_FIFO   	"/var/tmp/a4m/socat_output_smart_injector_fifo"
+#define RXFILE1		"/var/tmp/a4m/socat_smart_injector_input_data_file1"
+#define RXFILE2		"/var/tmp/a4m/socat_smart_injector_input_data_file2"
+#define PIPE_FIFO1   	"/var/tmp/a4m/socat_output_smart_injector_fifo1"
+#define PIPE_FIFO2   	"/var/tmp/a4m/socat_output_smart_injector_fifo2"
 #define logger { printf("%s:%d\n",__FILE__,__LINE__);}
 #define MAX_BUF 20
 #define MAX_BUF_LEN 17
 
 //#define DEBUG 0
-int main()
+int main(int argc, char *argv[])
 {
+  if (argc != 2)
+  {
+	printf("USAGE:  ./SAI [option]\n");
+	printf("1.  FIFO #1\n");
+	printf("2.  FIFO #2\n");
+	printf("3.  BOTH FIFOs (not implemented yet)\n");
+	return(1);
+  }
+
   char buffer[MAX_BUF];
   char response[MAX_BUF];
   char tempBuf[40];
@@ -35,7 +46,24 @@ int main()
   double NRT3 = 0.0;
   int pipe, buf_size, inj_address;
 
-  printf("STARTING UP SAI BLACK BOX\n");
+  // SETTING UP WHICH FIFO TO USE FOR COMMs TESTING
+  printf("***STARTING UP SAI BLACK BOX***\n");
+  if ((atoi(argv[1])) == 1)
+  {
+	int PIPE_FIFO = PIPE_FIFO1;
+	int RXFILE = RXFILE1;
+  	printf("INCOMING FIFO -> %s\n", PIPE_FIFO1);
+  	printf("OUTGOING FILE -> %s\n", RXFILE1);
+  }
+  else if ((atoi(argv[1])) == 2)
+  {
+
+	int PIPE_FIFO = PIPE_FIFO2;
+	int RXFILE = RXFILE2;
+  	printf("INCOMING FIFO -> %s\n", PIPE_FIFO2);
+  	printf("OUTGOING FILE -> %s\n", RXFILE2);
+  }
+
   memset(buffer, 0, MAX_BUF);
 
   while(1)
