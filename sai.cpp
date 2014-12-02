@@ -167,7 +167,7 @@ int main(int argc, char *argv[])
 
 	// Open up inj_rx and write response
 	if ((atoi(argv[1])) == 1)
-		pFile = fopen( RXFILE2, "w+");
+		pFile = fopen( RXFILE1, "w+");
 	if ((atoi(argv[1])) == 2)
 		pFile = fopen( RXFILE2, "w+");
   	fwrite(response, sizeof(char), strlen(response), pFile);
