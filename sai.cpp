@@ -13,13 +13,24 @@
 #include <unistd.h>
 #include <string.h>
 #include <fcntl.h>
+#include <fstream>
 #define RXFILE1		"/var/tmp/a4m/socat_smart_injector_input_data_file1"
 #define RXFILE2		"/var/tmp/a4m/socat_smart_injector_input_data_file2"
 #define PIPE_FIFO1   	"/var/tmp/a4m/socat_output_smart_injector_fifo1"
 #define PIPE_FIFO2   	"/var/tmp/a4m/socat_output_smart_injector_fifo2"
-#define logger { printf("%s:%d\n",__FILE__,__LINE__);}
+#define debugger { printf("%s:%d\n",__FILE__,__LINE__);}
 #define MAX_BUF 20
 #define MAX_BUF_LEN 17
+
+//  File stream for crash log
+  std::ofstream logger("log.txt");
+
+//void log( std::string file, int line, std::string message = "" )
+void log( std::string message = "" )
+{
+	//Write message to file
+	logger << __FILE__<< "[" << __LINE__ << "]: " << message << std::endl;
+} 
 
 //#define DEBUG 0
 int main(int argc, char *argv[])
@@ -47,17 +58,19 @@ int main(int argc, char *argv[])
   int pipe, buf_size, inj_address;
 
   // SETTING UP WHICH FIFO TO USE FOR COMMs TESTING
-  printf("***STARTING UP SAI BLACK BOX***\n");
+  log("***STARTING UP SAI BLACK BOX***");
   if ((atoi(argv[1])) == 1)
   {
   	printf("INCOMING FIFO -> %s\n", PIPE_FIFO1);
   	printf("OUTGOING FILE -> %s\n", RXFILE1);
+	log("FIFO -- /var/tmp/a4m/socat_output_smart_injector_fifo1");
   }
   else if ((atoi(argv[1])) == 2)
   {
 
   	printf("INCOMING FIFO -> %s\n", PIPE_FIFO2);
   	printf("OUTGOING FILE -> %s\n", RXFILE2);
+	log("FIFO -- /var/tmp/a4m/socat_output_smart_injector_fifo1");
   }
 
   memset(buffer, 0, MAX_BUF);
@@ -66,11 +79,11 @@ int main(int argc, char *argv[])
   {
 	//Read in inj_tx to buffer
 	if ((atoi(argv[1])) == 1)
-		if ( (pipe = open( PIPE_FIFO1 , O_RDONLY)) < 0) logger;
+		if ( (pipe = open( PIPE_FIFO1 , O_RDONLY)) < 0) log("ERROR - PIPE1 missing");
 	if ((atoi(argv[1])) == 2)
-		if ( (pipe = open( PIPE_FIFO2 , O_RDONLY)) < 0) logger;
+		if ( (pipe = open( PIPE_FIFO2 , O_RDONLY)) < 0) log("ERROR - PIPE2 missing");
 
-	if ( (buf_size = read(pipe, buffer, MAX_BUF)) < 0) logger;
+	if ( (buf_size = read(pipe, buffer, MAX_BUF)) < 0) log("ERROR - Buffer misread");
 	buffer[buf_size] = 0; //null terminate string
 
 	printf("\E[31;40mIncoming:  %s\E[0m  ", buffer);
@@ -142,16 +155,20 @@ int main(int argc, char *argv[])
 	}
 	else if (strncmp("WV", buffer+3, 2) == 0)
 	  strcat(response,"OK");
+
+	// GENERAL ERROR RESPONSES
 	else if ( strncmp ("", buffer, MAX_BUF_LEN) == 0)
 	{
 	  memset(response,0,MAX_BUF);
 	  printf("\E[33;40m[ERROR -- NO INC BUFFER]\E[0m\n");
+	  log("Error:  No incoming buffer detected");
 	  continue;
 	}
 	else
 	{
 	  strcat(response,"NO00");
 	  printf("\E[33;40m[ERROR -- NO CMD MATCH]\E[0m\n");
+	  log("Error:  No command match");
 	}
 
 	printf("\E[32;40mOutgoing: ");
