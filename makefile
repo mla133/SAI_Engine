@@ -12,7 +12,7 @@ $(TARGET): $(OBJ)
 .PHONY: clean
 
 clean:
-	rm -f *.o $(TARGET) 
+	rm -f *.o $(TARGET) log.txt 
 
 run: $(TARGET)
 	./$(TARGET)
