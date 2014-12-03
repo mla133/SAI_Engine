@@ -19,7 +19,7 @@
 #define PIPE_FIFO1   	"/var/tmp/a4m/socat_output_smart_injector_fifo1"
 #define PIPE_FIFO2   	"/var/tmp/a4m/socat_output_smart_injector_fifo2"
 #define debugger { printf("%s:%d\n",__FILE__,__LINE__);}
-#define MAX_BUF 20
+#define MAX_BUF 25
 #define MAX_BUF_LEN 17
 
 //  File stream for crash log
@@ -55,6 +55,7 @@ int main(int argc, char *argv[])
   double NRT = 0.0;
   double NRT2 = 0.0;
   double NRT3 = 0.0;
+  double NRT4 = 0.0;
   int pipe, buf_size, inj_address;
 
   // SETTING UP WHICH FIFO TO USE FOR COMMs TESTING
@@ -156,6 +157,36 @@ int main(int argc, char *argv[])
 	else if (strncmp("WV", buffer+3, 2) == 0)
 	  strcat(response,"OK");
 
+	// ADD-PAK
+	else if ( strncmp ("IN",buffer+3, 2) == 0 )
+	{
+	  if(inj_address == 100) NRT4 += 0.01;
+	  strcat(response, "OK");
+	}
+	else if ( strncmp ("EP",buffer+3, 2) == 0 )
+	  strcat(response, "OK");
+	else if ( strncmp ("DP",buffer+3, 2) == 0 )
+	  strcat(response, "OK");
+	else if ( strncmp ("RC",buffer+3, 2) == 0 )
+	  strcat(response, "OK");
+	else if ( strncmp ("AI",buffer+3, 2) == 0 )
+	  strcat(response, "OK");
+	else if ( strncmp ("DI",buffer+3, 2) == 0 )
+	  strcat(response, "OK");
+	else if ( strncmp ("CA",buffer+3, 2) == 0 )
+	  strcat(response, "OK");
+	else if ( strncmp ("PW",buffer+3, 2) == 0 )
+	  strcat(response, "OK");
+	else if ( strncmp ("ST",buffer+3, 2) == 0 )
+	  strcat( response, "ST 0000");
+	else if ( strncmp ("SV",buffer+3, 2) == 0 )
+	  strcat ( response, "SV 999 ABCDEF01");
+	else if ( strncmp ("TS",buffer+3, 2) == 0 )
+	{
+	  sprintf(tempBuf, "TS %012.3f 0000", NRT4);
+	  strcat(response, tempBuf);
+	}
+
 	// GENERAL ERROR RESPONSES
 	else if ( strncmp ("", buffer, MAX_BUF_LEN) == 0)
 	{
@@ -190,7 +221,7 @@ int main(int argc, char *argv[])
   	fwrite(response, sizeof(char), strlen(response), pFile);
   	fclose(pFile);
 
-	//Zero out tx/rx buffer strings
+	//Zero out tx/rx buffer strings and close up pipe
 	memset(response,0,MAX_BUF);
 	memset(buffer,0,MAX_BUF);
 	close(pipe);
